@@ -22,3 +22,16 @@ select,
 textarea {
     max-width: 280px;
 }
+
+/* Font type for the players */
+.human-player {
+    font-family: "Comic Sans MS", cursive, sans-serif
+}
+
+.computer-player {
+    font-family: "Courier New", Courier, monospace
+}
+
+.word {
+    font-size: xx-large
+}

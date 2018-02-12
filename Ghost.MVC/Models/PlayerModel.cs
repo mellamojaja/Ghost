@@ -9,7 +9,16 @@ namespace Ghost.MVC.Models
     {
         public string Name { get; set; }
         public int NumberOfGames { get; set; }
-        public int NumberOfVictories { get; set; }        
+        public int NumberOfVictories { get; set; }    
+        
+        public PlayerModel(string playerName)
+        {
+            Name = playerName;
+            NumberOfGames = 0;
+            NumberOfVictories = 0;
+        }
+
+        
     }
 
 }

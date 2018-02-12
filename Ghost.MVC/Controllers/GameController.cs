@@ -9,39 +9,54 @@ namespace Ghost.MVC.Controllers
 {
     public class GameController : Controller
     {
-        public GameViewModel GameView;
-        public GameStateModel GameState;
+        private GamePlayModel Game {
+            get { return Session["game"] as GamePlayModel; }
+            set { Session["game"] = value; }
+        }
 
         // GET: Game
         public ActionResult Play()
         {         
-            return View(GameView);
+            return View(Game);
         }
 
         // GET: Game
         [HttpPost]
-        public ActionResult Play(GameViewModel game)
+        public ActionResult Play(GamePlayModel game)
         {
-            if (! string.IsNullOrEmpty(game.NewMove))
-            {
-                // Do the move
+            UpdateConfigFields(game);
+            if (string.IsNullOrEmpty(game.NewMove))
+            {                
+                DoNewMove(game);
             }
             
-            return View(GameView);
+            if (Game.Analysis.Winner != -1)
+            {
+                return View("GameEnd", Game);
+            }
+
+            return View(Game);
         }
 
+        [HttpPost]
+        public ActionResult Pass(GamePlayModel game)
+        {
+            UpdateConfigFields(game);
+            Pass(game);           
+            return View("GameEnd", Game);
+        }
 
         // GET: Game/Create
         public ActionResult Create(PlayerNameModel playerName)
         {
             CreateGame(playerName);
-            return RedirectToAction("play");
+            return RedirectToAction("play", Game);
         }
 
         // GET: Game/Reset
         public ActionResult Reset()
         {
-            ResetGame();
+            Game.Reset();
             return RedirectToAction("play");
         }
 
@@ -50,40 +65,19 @@ namespace Ghost.MVC.Controllers
 
         private void CreateGame(PlayerNameModel playerName)
         {
-            var analysis = new GameStateAnalysisModel() { Winner = -1, ExpectedWinner = -1, Explanation = "Who knows waht will happen..." };
-            var player = new PlayerModel() { Name = playerName.Name, NumberOfGames = 0, NumberOfVictories = 0 };
+            var analysis = new GameAnalysisModel();
+            var player = new PlayerModel(playerName.Name);
+            Game = new GamePlayModel(player, analysis);
+        }        
 
-            GameState = new GameStateModel() { CurrentPlayer = 0, Word = "", Move = "", Analysis = analysis, Player = player };
-            GameView = new GameViewModel()
-            {
-                HelpPlayer = false,
-                Moves = new List<string>(),
-                NewMove = "",
-                Explanation = "Who knows waht will happen...",
-                Player = player
-            };
+        private void UpdateConfigFields(GamePlayModel game)
+        {
+            Game.EnablePlayerHelp = game.EnablePlayerHelp;            
         }
 
-        private void ResetGame()
-        {            
-            var player = new PlayerModel()
-            {
-                Name = GameState.Player.Name,
-                NumberOfGames = GameState.Player.NumberOfGames + 1,
-                NumberOfVictories = GameState.Analysis.Winner == 0 ? GameState.Player.NumberOfVictories + 1 : GameState.Player.NumberOfVictories
-            };
-
-            var analysis = new GameStateAnalysisModel() { Winner = -1, ExpectedWinner = -1, Explanation = "Who knows waht will happen..." };
-
-            GameState = new GameStateModel() { CurrentPlayer = 0, Word = "", Move = "", Analysis = analysis, Player = player };
-            GameView = new GameViewModel()
-            {
-                HelpPlayer = GameView.HelpPlayer,
-                Moves = new List<string>(),
-                NewMove = "",
-                Explanation = "Who knows waht will happen...",
-                Player = player
-            };
+        private void DoNewMove(GamePlayModel game)
+        {
+            return;
         }
 
     }

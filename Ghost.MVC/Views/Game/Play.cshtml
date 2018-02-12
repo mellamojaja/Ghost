@@ -1,53 +1,129 @@
-﻿@model Ghost.MVC.Models.GameViewModel
+﻿@model Ghost.MVC.Models.GamePlayModel
 
 @{
     ViewBag.Title = "Play";
 }
 
-<h2>Play</h2>
 
 @using (Html.BeginForm())
 {
     @Html.AntiForgeryToken()
-    
-    <div class="form-horizontal">
-        <h4>GameViewModel</h4>
-        <hr />
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+    <div class="form-inline col-md-offset-2">
         <div class="form-group">
-            @Html.LabelFor(model => model.HelpPlayer, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                <div class="checkbox">
-                    @Html.EditorFor(model => model.HelpPlayer)
-                    @Html.ValidationMessageFor(model => model.HelpPlayer, "", new { @class = "text-danger" })
+            <div>
+                <span class="word">@Html.Raw("Word >")</span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div>
+                @{var word = "Juanalfredo".ToLower();}
+                @for (var i = 0; i < word.Length; i++)
+                {
+                    if (i % 2 == 0)
+                    {
+                        <span class="human-player word">@Html.Raw(word.Substring(i, 1))</span>
+                    }
+                    else
+                    {
+                        <span class="computer-player word">@Html.Raw(word.Substring(i, 1))</span>
+                    }
+                }
+            </div>
+        </div>
+        @if (Model.Analysis.Winner < 0)
+        {
+            <div class="form-group">
+                @Html.EditorFor(model => model.NewMove, new { htmlAttributes = new { @class = "form-control" } })
+            </div>
+            <div class="form-group">
+                <button type="submit" value="Add" class="btn btn-primary">Add</button>
+                <button type="button" value="Pass" class="btn btn-danger">Pass</button>
+            </div>
+        }
+        else
+        {
+            <div class="form-group">
+                <button type="submit" value="Play again" class="btn btn-primary">Play again</button>
+            </div>
+        }
+    </div>
+
+    if (Model.Analysis.Winner >= 0)
+    {
+        <div class="form-horizontal col-md-offset-1 col-md-10">
+            <div class="row">
+                <div class="form-group">
+                    <div>
+                        <div class="alert alert-danger">
+                            Analysis:Ana lysis: Analysis :Analysis:Analys is: Analysis:Analysis: Analysis:Analysis:Analysis: Ana lysis:Analysis:
+                            Analysis:An alysis:Analysis:Analysis: Analysis:Analysis:Analysis:
+                            Analysis:Anal ysis:A nalysis:Analysis:Analysis:
+                            @if (Model.EnablePlayerHelp)
+                            { @Model.Analysis.Explanation }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+<hr />
+
+<div class="form-horizontal">
+    <div class="row">
+        <div class="col-md-offset-1 col-md-4">
+            @*Human player region*@
+            <div class="form-group">
+                <div>
+                    <h4>
+                        Player 1: @Model.Player.Name
+                        <span class="badge">@Model.Player.NumberOfVictories / @Model.Player.NumberOfGames</span>
+                    </h4>
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.EnablePlayerHelp, htmlAttributes: new { @class = "control-label" })
+                <div>
+                    <div class="checkbox">
+                        @Html.CheckBoxFor(model => model.EnablePlayerHelp)
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div>
+                    <div class="alert alert-info">
+                        Analysis:Ana lysis: Analysis :Analysis:Analys is: Analysis:Analysis: Analysis:Analysis:Analysis: Ana lysis:Analysis:
+                        Analysis:An alysis:Analysis:Analysis: Analysis:Analysis:Analysis:
+                        Analysis:Anal ysis:A nalysis:Analysis:Analysis:
+                        @if (Model.EnablePlayerHelp)
+                        { @Model.Analysis.Explanation }
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.NewMove, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.NewMove, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.NewMove, "", new { @class = "text-danger" })
+        <div class="col-md-offset-1 col-md-4">
+            @*Computer player region*@
+            <div class="form-group">
+                <div>
+                    <h4>
+                        Player 2: Computer
+                    </h4>
+                </div>
             </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.Explanation, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.Explanation, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.Explanation, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Save" class="btn btn-default" />
+            <div class="form-group">
+                <div>
+                    <div class="alert alert-info">
+                        Analysis:Ana lysis: Analysis :Analysis:Analys is: Analysis:Analysis: Analysis:Analysis:Analysis: Ana lysis:Analysis:
+                        Analysis:An alysis:Analysis:Analysis: Analysis:Analysis:Analysis:
+                        Analysis:Anal ysis:A nalysis:Analysis:Analysis:
+                        @if (Model.EnablePlayerHelp)
+                        { @Model.Analysis.Explanation }
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-}
-
-<div>
-    @Html.ActionLink("Back to List", "Index")
 </div>
+}
