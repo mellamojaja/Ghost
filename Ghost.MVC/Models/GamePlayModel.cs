@@ -14,6 +14,7 @@ namespace Ghost.MVC.Models
         [Display(Name = "New letter")]
         [StringLength(1, ErrorMessage = "Please enter only one character")]
         [RegularExpression("[a-zA-Z]", ErrorMessage = "Please enter a valid letter (from 'a' to 'z')")]
+
         public string NewMove { get; set; }
 
         public List<string> Moves { get; set; }        

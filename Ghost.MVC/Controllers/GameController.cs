@@ -99,7 +99,7 @@ namespace Ghost.MVC.Controllers
         private void DoNewMove(GamePlayModel game)
         {
             var path = "localhost:50519/api/GhostAnalyser/" + game.GetNewWord();
-            var analysis = await GetAnalysisAsync();
+            //var analysis = await GetAnalysisAsync();
             return;
         }
 
