@@ -3,13 +3,19 @@ using System.Web.Http;
 
 namespace Ghost.AI.API.Controllers
 {
+    /// <summary>
+    /// The suggested next move
+    /// </summary>
     public class NextMoveController : ApiController
     {
-        // GET: api/NextMove/{state}
-        public string Get(string state)
+        // POST: api/nextmove/{state}
+        public GameStateModel Post(GameStateModel state)
         {
             // Do some logic 
-            var result = state + "1";
+            var result = new GameStateModel
+            {
+                Word = state.Word + "1"
+            };    
             return result;
         }
     }

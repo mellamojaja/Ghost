@@ -32,7 +32,7 @@ namespace Ghost.AI.API.Tests
         public void Get_WinnerPropertyMustBeFilled()
         {            
             var analysis = Controller.Get(State);
-            Assert.AreEqual(-1, analysis);
+            Assert.AreEqual(-1, analysis.Winner);
         }
     }
 }
