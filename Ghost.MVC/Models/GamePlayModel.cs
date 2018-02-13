@@ -38,5 +38,16 @@ namespace Ghost.MVC.Models
             NewMove = "";
             Moves = new List<string>();
         }
+
+        public string GetCurrentWord()
+        {
+            var result = "";            
+            Moves.ForEach(aMove => result = result + aMove);
+            return result;
+        }
+        public string GetNewWord()
+        {
+            return GetCurrentWord() + NewMove;
+        }
     }
 }

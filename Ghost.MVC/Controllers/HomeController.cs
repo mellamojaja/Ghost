@@ -6,9 +6,7 @@ using System.Web;
 using System.Web.Mvc;
 
 namespace Ghost.MVC.Controllers
-{
-    
-
+{    
     public class HomeController : Controller
     {                
         public ActionResult Start()

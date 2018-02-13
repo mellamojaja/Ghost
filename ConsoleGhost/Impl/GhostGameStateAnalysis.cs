@@ -20,7 +20,8 @@ namespace ConsoleGhost.Impl
         public string Explanation { get; set; }
 
         public int ExpectedWinner { get; set; }
-        
+        public string Help { get; set; }
+
         public string LongestPossibleWord { get; set; }
         public string ShortestPossibleWord { get; set; }
     }

@@ -1,7 +1,11 @@
 ﻿using Ghost.MVC.Models;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 
@@ -9,6 +13,23 @@ namespace Ghost.MVC.Controllers
 {
     public class GameController : Controller
     {
+        private static HttpClient _client;
+
+        private static HttpClient Client
+        {
+            get
+            {
+                if (_client == null)
+                {
+                    _client = new HttpClient();
+                    _client.BaseAddress = new Uri("http://localhost:50519");
+                    _client.DefaultRequestHeaders.Accept.Clear();
+                    _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                }
+                return _client;
+            }
+        }
+
         private GamePlayModel Game {
             get { return Session["game"] as GamePlayModel; }
             set { Session["game"] = value; }
@@ -77,8 +98,21 @@ namespace Ghost.MVC.Controllers
 
         private void DoNewMove(GamePlayModel game)
         {
+            var path = "localhost:50519/api/GhostAnalyser/" + game.GetNewWord();
+            var analysis = await GetAnalysisAsync();
             return;
         }
 
+        static async Task<GameAnalysisModel> GetAnalysisAsync()
+        {
+            GameAnalysisModel analysis = null;
+            HttpResponseMessage response = await Client.GetAsync("api/GhostAnalyser");
+            if (response.IsSuccessStatusCode)
+            {
+                var responseBody = await response.Content.ReadAsStringAsync();
+                analysis = JsonConvert.DeserializeObject<GameAnalysisModel>(responseBody);                
+            }
+            return analysis;
+        }
     }
 }
