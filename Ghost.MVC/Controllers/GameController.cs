@@ -72,7 +72,7 @@ namespace Ghost.MVC.Controllers
 
         private void UpdateConfigFields(GamePlayModel game)
         {
-            Game.EnablePlayerHelp = game.EnablePlayerHelp;            
+            Game.ShowPlayerHelp = game.ShowPlayerHelp;            
         }
 
         private void DoNewMove(GamePlayModel game)

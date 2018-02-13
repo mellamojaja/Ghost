@@ -9,11 +9,11 @@ namespace Ghost.MVC.Models
     public class GamePlayModel
     {
         [Display(Name = "Show player help")]
-        public bool EnablePlayerHelp { get; set; }
+        public bool ShowPlayerHelp { get; set; }
 
         [Display(Name = "New letter")]
-        [StringLength(1)]
-        [RegularExpression("[a-zA-Z]")]
+        [StringLength(1, ErrorMessage = "Please enter only one character")]
+        [RegularExpression("[a-zA-Z]", ErrorMessage = "Please enter a valid letter (from 'a' to 'z')")]
         public string NewMove { get; set; }
 
         public List<string> Moves { get; set; }        
@@ -22,7 +22,7 @@ namespace Ghost.MVC.Models
 
         public GamePlayModel(PlayerModel player, GameAnalysisModel analysis)
         {
-            EnablePlayerHelp = false;
+            ShowPlayerHelp = false;
             NewMove = "";
             Moves = new List<string>();
             Player = player;
