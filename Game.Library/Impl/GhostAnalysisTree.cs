@@ -1,11 +1,11 @@
-﻿using ConsoleGhost.Properties;
+﻿using Game.Library.Properties;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace ConsoleGhost.Impl
+namespace Game.Library.Impl
 {
-    public sealed class GhostAnalysisTree
+    internal sealed class GhostAnalysisTree
     {
         public static GhostAnalysisTree Instance
         {
@@ -43,9 +43,9 @@ namespace ConsoleGhost.Impl
             var treeNode = FindWordNodeOrLongestExistingRoot(word, _tree);
             var analysis = treeNode.Value;
 
-            if (analysis.State.Word.Length < word.Length)
+            if (GetWord(analysis.State).Length < word.Length)
             {
-                if (_words.Contains(word))
+                if (_validWords.Contains(word))
                 {
                     return WordType.derived;                    
                 }
@@ -69,17 +69,17 @@ namespace ConsoleGhost.Impl
         private static volatile GhostAnalysisTree _instance;        
         private static object syncRoot = new Object();
         private static TreeNode<GhostGameStateAnalysis> _tree;
-        private static string[] _words;
-
+        private static string[] _validWords;
+       
         private GhostAnalysisTree()
-        {
-            _words = Resources.gosthGameDict.Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            _words = RemoveDerivedWords(_words);
+        {           
+            _validWords = Resources.gosthGameDict.Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            _validWords = RemoveDerivedWords(_validWords);
 
-            var initialStateAnalysis = new GhostGameStateAnalysis(new GhostGameState() { CurrentPlayer = 0, Word = "" });
+            var initialStateAnalysis = new GhostGameStateAnalysis(new GhostGameState(""));
             _tree = new TreeNode<GhostGameStateAnalysis>(initialStateAnalysis);
 
-            foreach (var word in _words)
+            foreach (var word in _validWords)
             {
                 AddWordToTree(word, _tree);
             }
@@ -92,7 +92,7 @@ namespace ConsoleGhost.Impl
             var result = new List<string>();
             var lastWord = "";
 
-            Array.Sort(words, StringComparer.InvariantCulture);
+            Array.Sort(words, StringComparer.InvariantCultureIgnoreCase);
 
             foreach (var word in words)
             {
@@ -138,7 +138,7 @@ namespace ConsoleGhost.Impl
             }
             else
             {
-                child = tree.Children.FirstOrDefault(childNode => childNode.Value.State.Word == word.Substring(0, childNode.Depth));
+                child = tree.Children.FirstOrDefault(childNode => GetWord(childNode.Value.State) == word.Substring(0, childNode.Depth));
                 if (child == null)
                 {
                     return tree;
@@ -151,14 +151,7 @@ namespace ConsoleGhost.Impl
         {
             var newWord = word.Substring(0, tree.Depth + 1);
             var nextPlayer = tree.Value.State.CurrentPlayer == 0 ? 1 : 0;
-            return tree.AddChild(new GhostGameStateAnalysis()
-            {
-                State = new GhostGameState() { CurrentPlayer = nextPlayer, Word = newWord },
-                Winner = -1,
-                ExpectedWinner = -1,
-                LongestPossibleWord = "",
-                ShortestPossibleWord = ""                
-            });
+            return tree.AddChild(new GhostGameStateAnalysis(new GhostGameState(newWord)));
         }
 
         private void AnalyseNode(TreeNode<GhostGameStateAnalysis> treeNode)
@@ -167,27 +160,31 @@ namespace ConsoleGhost.Impl
             {
                 // The previous player completed the word, so you win
                 treeNode.Value.Winner = treeNode.Value.State.CurrentPlayer;
-                treeNode.Value.ExpectedWinner = treeNode.Value.State.CurrentPlayer;
-                treeNode.Value.LongestPossibleWord = treeNode.Value.State.Word;
-                treeNode.Value.ShortestPossibleWord = treeNode.Value.State.Word;
+                treeNode.Value.ExpectedMaxTurns = 0;
+                treeNode.Value.ExpectedWinner = treeNode.Value.State.CurrentPlayer;                
             }
             else
             {
-                treeNode.Value.ExpectedWinner = FindExpectedWinner(treeNode);                
+                treeNode.Value.ExpectedWinner = FindExpectedWinner(treeNode);
+                treeNode.Value.ExpectedMaxTurns = FindExpectedMaxTurns(treeNode);
                 treeNode.Value.LongestPossibleWord = FindLongestPossibleWord(treeNode);
                 treeNode.Value.ShortestPossibleWord = FindShortestPossibleWord(treeNode);
+                treeNode.Value.RecommendedWordList = FindRecommendedWordList(treeNode);
             }
         }
 
         private int FindExpectedWinner(TreeNode<GhostGameStateAnalysis> treeNode)
         {
-            if (treeNode.Children.All(childNode => childNode.Value.ExpectedWinner == 0))
+            var thisPlayer = treeNode.Value.State.CurrentPlayer;
+            var opposingPlayer = thisPlayer == 0 ? 1 : 0;
+
+            if (treeNode.Children.Any(childNode => childNode.Value.ExpectedWinner == thisPlayer))
             {
-                return 0;
+                return thisPlayer;
             }
-            else if (treeNode.Children.All(childNode => childNode.Value.ExpectedWinner == 1))
+            else if (treeNode.Children.All(childNode => childNode.Value.ExpectedWinner == opposingPlayer))
             {
-                return 1;
+                return opposingPlayer;
             }
             else
             {
@@ -197,7 +194,8 @@ namespace ConsoleGhost.Impl
 
         private string FindLongestPossibleWord(TreeNode<GhostGameStateAnalysis> treeNode)
         {
-            var result = "";            
+            var result = ""; 
+            
             foreach (var child in treeNode.Children)
             {
                 if (result == "" || result.Length < child.Value.LongestPossibleWord.Length)
@@ -210,7 +208,8 @@ namespace ConsoleGhost.Impl
 
         private string FindShortestPossibleWord(TreeNode<GhostGameStateAnalysis> treeNode)
         {
-            var result = "";            
+            var result = "";  
+            
             foreach (var child in treeNode.Children)
             {                
                 if (result == "" || result.Length > child.Value.ShortestPossibleWord.Length)
@@ -221,10 +220,45 @@ namespace ConsoleGhost.Impl
             return result;
         }
 
+        private List<string> FindRecommendedWordList(TreeNode<GhostGameStateAnalysis>  treeNode)
+        {
+            var thisPlayer = treeNode.Value.State.CurrentPlayer;
+
+            var winningChildren = treeNode.Children.Where(child => child.Value.ExpectedWinner == thisPlayer).ToList();
+            if (winningChildren.Count > 0)
+            {
+                return winningChildren.Select(child => GetWord(child.Value.State)).ToList();                
+            }
+
+            var longestPossibleWord = FindLongestPossibleWord(treeNode);
+            var longestWordChildren = treeNode.Children.Where(child => child.Value.LongestPossibleWord.Length == longestPossibleWord.Length).ToList();
+            if (longestWordChildren.Count > 0)
+            {
+                return longestWordChildren.Select(child => GetWord(child.Value.State)).ToList();
+            }
+
+            return treeNode.Children.Select(child => GetWord(child.Value.State)).ToList();
+        }
+
+        private int FindExpectedMaxTurns(TreeNode<GhostGameStateAnalysis> treeNode)
+        {
+            return treeNode.Children.Min(child => child.Value.ExpectedMaxTurns );
+        }
+
         private void AnalyseTree(TreeNode<GhostGameStateAnalysis> treeNode)
         {
             treeNode.PostTraverse(AnalyseNode);
         }        
+
+        private string GetWord(IState state)
+        {
+            return (state as GhostGameState).Word;
+        }
+
+        private int GetCurrentPlayer(string word)
+        {
+            return word.Length % 2 == 0 ? 0 : 1;
+        }       
         #endregion
     }
 

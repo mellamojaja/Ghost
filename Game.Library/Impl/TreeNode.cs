@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 
-namespace ConsoleGhost.Impl
+namespace Game.Library.Impl
 {
-    public class TreeNode<T>
+    internal class TreeNode<T>
     {        
         private readonly List<TreeNode<T>> _children = new List<TreeNode<T>>();        
 

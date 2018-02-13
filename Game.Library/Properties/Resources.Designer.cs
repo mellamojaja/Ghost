@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ConsoleGhost.Properties {
+namespace Game.Library.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace ConsoleGhost.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("ConsoleGhost.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Game.Library.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -114,12 +114,7 @@ namespace ConsoleGhost.Properties {
         ///abandon
         ///abandonable
         ///abandoned
-        ///abandonedly
-        ///abandonee
-        ///abandoner
-        ///abandoners
-        ///abandoning
-        ///abandonm [resto de la cadena truncado]&quot;;.
+        ///abandoned [resto de la cadena truncado]&quot;;.
         /// </summary>
         internal static string gosthGameDict {
             get {

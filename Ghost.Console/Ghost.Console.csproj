@@ -42,21 +42,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Impl\GhostAnalysisTree.cs" />
-    <Compile Include="Impl\GhostGame.cs" />
-    <Compile Include="Impl\GhostGameStateAnalysis.cs" />
-    <Compile Include="Impl\GhostGameState.cs" />
-    <Compile Include="IGame.cs" />
-    <Compile Include="IGameResult.cs" />
-    <Compile Include="IStateAnalysis.cs" />
-    <Compile Include="IPlayer.cs" />
-    <Compile Include="Impl\GhostPerfectIAPlayer.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Impl\TreeNode.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -71,7 +61,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
-    <None Include="Resources\gosthGameDict.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Game.Library\Game.Library.csproj">
+      <Project>{bc6460b9-30ed-41fc-8bf0-9b45e258bc03}</Project>
+      <Name>Game.Library</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
