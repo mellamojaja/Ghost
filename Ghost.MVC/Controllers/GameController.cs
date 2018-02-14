@@ -1,59 +1,57 @@
 ﻿using Ghost.MVC.Models;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Threading.Tasks;
-using System.Web;
+using Ghost.MVC.Models.Dtos;
+using System.Text.RegularExpressions;
 using System.Web.Mvc;
 
 namespace Ghost.MVC.Controllers
 {
     public class GameController : Controller
-    {
-        private static HttpClient _client;
-
-        private static HttpClient Client
-        {
-            get
-            {
-                if (_client == null)
-                {
-                    _client = new HttpClient();
-                    _client.BaseAddress = new Uri("http://localhost:50519");
-                    _client.DefaultRequestHeaders.Accept.Clear();
-                    _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                }
-                return _client;
-            }
-        }
-
-        private GamePlayModel Game {
-            get { return Session["game"] as GamePlayModel; }
-            set { Session["game"] = value; }
-        }
-
-        // GET: Game
+   {       
         public ActionResult Play()
-        {         
+        {
+            if (Game == null)
+            {
+                CreateGame(new PlayerNameModel() { Name = "Human" });
+            }
+
             return View(Game);
         }
-
-        // GET: Game
+        
         [HttpPost]
         public ActionResult Play(GamePlayModel game)
         {
-            UpdateConfigFields(game);
-            if (string.IsNullOrEmpty(game.NewMove))
-            {                
-                DoNewMove(game);
-            }
-            
-            if (Game.Analysis.Winner != -1)
+            if (Request.Params["command"] != null && Request.Params["command"].Equals("Pass"))
             {
-                return View("GameEnd", Game);
+                return RedirectToAction("Pass", Game);
+            }
+
+            RememberInputFieldValues(game);
+            
+            // Human user move
+            ApplyUserMove(game);
+
+            var state = new GameStateModel { Word = Game.Word };
+            var analysis = Utilities.Analize(state);
+
+            if (analysis.HasWinner)
+            {
+                TakeNoteOfWinner(analysis);                
+                // End the game
+                return RedirectToAction("Results", "EndGame", Game);
+            }
+
+            // IA move
+            var newState = Utilities.NextMove(state);
+            ApplyComputerMove(newState, analysis);
+
+            state = new GameStateModel { Word = Game.Word };
+            analysis = Utilities.Analize(state);
+
+            if (analysis.HasWinner)
+            {
+                TakeNoteOfWinner(analysis);
+                // End the game
+                return RedirectToAction("Results", "EndGame", Game);
             }
 
             return View(Game);
@@ -62,57 +60,92 @@ namespace Ghost.MVC.Controllers
         [HttpPost]
         public ActionResult Pass(GamePlayModel game)
         {
-            UpdateConfigFields(game);
-            Pass(game);           
-            return View("GameEnd", Game);
+            RememberInputFieldValues(game);
+
+            // Not implemented yed
+            
+            return View(Game);
         }
 
         // GET: Game/Create
         public ActionResult Create(PlayerNameModel playerName)
         {
             CreateGame(playerName);
-            return RedirectToAction("play", Game);
+
+            return RedirectToAction("play");
         }
 
         // GET: Game/Reset
         public ActionResult Reset()
         {
-            Game.Reset();
+            if (Game == null)
+            {
+                CreateGame(new PlayerNameModel() { Name = "Human" });
+            }
+            else
+            {
+                Game.Reset();
+            }            
             return RedirectToAction("play");
         }
 
-        
-        
+        #region Private        
+        private GamePlayModel Game
+        {
+            get { return Session["game"] as GamePlayModel; }
+            set { Session["game"] = value; }
+        }
 
         private void CreateGame(PlayerNameModel playerName)
-        {
-            var analysis = new GameAnalysisModel();
+        {            
             var player = new PlayerModel(playerName.Name);
-            Game = new GamePlayModel(player, analysis);
+            Game = new GamePlayModel(player);
         }        
 
-        private void UpdateConfigFields(GamePlayModel game)
+        private void RememberInputFieldValues(GamePlayModel game)
         {
             Game.ShowPlayerHelp = game.ShowPlayerHelp;            
+            Game.NewMove = game.NewMove;
         }
 
-        private void DoNewMove(GamePlayModel game)
+        private void ApplyUserMove(GamePlayModel game)
         {
-            var path = "localhost:50519/api/GhostAnalyser/" + game.GetNewWord();
-            //var analysis = await GetAnalysisAsync();
-            return;
-        }
+            var newMove = game.NewMove.Trim().ToLower();
 
-        static async Task<GameAnalysisModel> GetAnalysisAsync()
-        {
-            GameAnalysisModel analysis = null;
-            HttpResponseMessage response = await Client.GetAsync("api/GhostAnalyser");
-            if (response.IsSuccessStatusCode)
+            if (! string.IsNullOrEmpty(newMove))
             {
-                var responseBody = await response.Content.ReadAsStringAsync();
-                analysis = JsonConvert.DeserializeObject<GameAnalysisModel>(responseBody);                
+                newMove = newMove.Substring(0, 1);
+                Game.Moves.Add(newMove);
+                Game.Word = Game.Word + newMove;
+                Game.NewMove = "";
             }
-            return analysis;
+        }       
+
+        private void ApplyComputerMove(GameStateModel newState, GameAnalysisModel analysis)
+        {
+            if (Game.Word.Length < newState.Word.Length)
+            {
+                var lastLetter = newState.Word.Substring(newState.Word.Length - 1, 1);
+                Game.Moves.Add(lastLetter);
+                Game.Word = newState.Word;
+                Game.ComputerLastMove = newState.Word;
+                var message = Regex.Replace(analysis.Help, "player 1", (match => "I" ), RegexOptions.IgnoreCase);
+                message = Regex.Replace(message, "player 0", (match => "you"), RegexOptions.IgnoreCase);
+                Game.ComputerLastMoveExplanation = string.Format("{0}. So, I have played the letter '{1}'", message, lastLetter);
+            }            
         }
+
+        private void TakeNoteOfWinner(GameAnalysisModel analysis)
+        {
+            if (analysis.HasWinner)
+            {
+                Game.Winner = analysis.Winner == 0 ? Game.Player.Name : "Computer";
+                var message = Regex.Replace(analysis.Explanation, "player 1", (match => "Computer"), RegexOptions.IgnoreCase);
+                message = Regex.Replace(message, "player 0", (match => Game.Player.Name), RegexOptions.IgnoreCase);
+                Game.WinnerExplanation = string.Format("{0}. So, {1} player has won", message, Game.Winner);
+            }
+        }
+        #endregion
+
     }
 }

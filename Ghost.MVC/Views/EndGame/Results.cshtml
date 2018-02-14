@@ -1,8 +1,9 @@
 ﻿@model Ghost.MVC.Models.GamePlayModel
 
 @{
-    ViewBag.Title = "Play";
+    ViewBag.Title = "Results";
 }
+
 
 
 @using (Html.BeginForm())
@@ -10,15 +11,15 @@
     @Html.AntiForgeryToken()
 
     <div class="form-inline col-md-offset-2">
-
+        
         <div class="form-group">
             <div>
                 <span class="word">@Html.Raw("Word >")</span>
             </div>
         </div>
-
+        
         <div class="form-group">
-            <div>
+            <div>                
                 @for (var i = 0; i < Model.Word.Length; i++)
                 {
                     if (i % 2 == 0)
@@ -32,14 +33,25 @@
                 }
             </div>
         </div>
-
+        
         <div class="form-group">
-            @Html.EditorFor(model => model.NewMove, new { htmlAttributes = new { @class = "form-control letter-input" } })
+            @Html.EditorFor(model => model.NewMove, new { htmlAttributes = new { @class = "form-control letter-input disabled" } })
+        </div>        
+        
+        <div class="form-group">
+            <button type="submit" name="command" value="PlayAgain" class="btn btn-primary">Play again</button>
         </div>
+    </div>
 
-        <div class="form-group">
-            <button type="submit" name="command" value="Add" class="btn btn-primary">Add</button>
-            <button type="submit" name="command" value="Pass" class="btn btn-danger disabled">Pass</button>
+    <div class="form-horizontal col-md-offset-1 col-md-10">
+        <div class="row">
+            <div class="form-group">
+                <div>
+                    <div class="alert alert-danger">
+                        @Html.Raw(@Model.WinnerExplanation)
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -61,7 +73,7 @@
                         @Html.LabelFor(model => model.ShowPlayerHelp, htmlAttributes: new { @class = "control-label" })
                         <div>
                             <div class="checkbox">
-                                @Html.CheckBoxFor(model => model.ShowPlayerHelp)
+                                @Html.CheckBoxFor(model => model.ShowPlayerHelp, htmlAttributes: new { @class = "disabled" })
                             </div>
                         </div>
                     </div>
@@ -85,7 +97,6 @@
                             </h4>
                         </div>
                     </div>
-
                     @if (Model.ComputerLastMoveExplanation.Length > 0)
                     {
                         <div class="form-group">
@@ -98,6 +109,6 @@
                     }
                 </div>
             </div>
-
         </div>
-}
+                    }
+

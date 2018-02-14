@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Web;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Ghost.MVC.Models
 {
@@ -10,7 +6,6 @@ namespace Ghost.MVC.Models
     {
         [Required(ErrorMessage = "Sorry, you can't play if you don't tell me your name")]
         [Display(Name = "Player name")]
-
         public string Name { get; set; }
     }
 }
