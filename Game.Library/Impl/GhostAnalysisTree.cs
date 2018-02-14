@@ -43,7 +43,7 @@ namespace Game.Library.Impl
             var treeNode = FindWordNodeOrLongestExistingRoot(word, _tree);
             var analysis = treeNode.Value;
 
-            if (GetWord(analysis.State).Length < word.Length)
+            if (analysis.State.State.Length < word.Length)
             {
                 if (_validWords.Contains(word))
                 {
@@ -76,7 +76,7 @@ namespace Game.Library.Impl
             _validWords = Resources.gosthGameDict.Split(new char[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             _validWords = RemoveDerivedWords(_validWords);
 
-            var initialStateAnalysis = new GhostGameStateAnalysis(new GhostGameState(""));
+            var initialStateAnalysis = new GhostGameStateAnalysis(new GameState(0, "", ""));
             _tree = new TreeNode<GhostGameStateAnalysis>(initialStateAnalysis);
 
             foreach (var word in _validWords)
@@ -138,7 +138,7 @@ namespace Game.Library.Impl
             }
             else
             {
-                child = tree.Children.FirstOrDefault(childNode => GetWord(childNode.Value.State) == word.Substring(0, childNode.Depth));
+                child = tree.Children.FirstOrDefault(childNode => childNode.Value.State.State == word.Substring(0, childNode.Depth));
                 if (child == null)
                 {
                     return tree;
@@ -151,7 +151,7 @@ namespace Game.Library.Impl
         {
             var newWord = word.Substring(0, tree.Depth + 1);
             var nextPlayer = tree.Value.State.CurrentPlayer == 0 ? 1 : 0;
-            return tree.AddChild(new GhostGameStateAnalysis(new GhostGameState(newWord)));
+            return tree.AddChild(new GhostGameStateAnalysis(new GameState(nextPlayer, newWord, newWord)));
         }
 
         private void AnalyseNode(TreeNode<GhostGameStateAnalysis> treeNode)
@@ -162,8 +162,8 @@ namespace Game.Library.Impl
                 treeNode.Value.Winner = treeNode.Value.State.CurrentPlayer;
                 treeNode.Value.ExpectedMaxTurns = 0;
                 treeNode.Value.ExpectedWinner = treeNode.Value.State.CurrentPlayer;
-                treeNode.Value.LongestPossibleWord = GetWord(treeNode.Value.State);
-                treeNode.Value.ShortestPossibleWord = GetWord(treeNode.Value.State);
+                treeNode.Value.LongestPossibleWord = treeNode.Value.State.State;
+                treeNode.Value.ShortestPossibleWord = treeNode.Value.State.State;
             }
             else
             {
@@ -232,17 +232,17 @@ namespace Game.Library.Impl
             var winningChildren = treeNode.Children.Where(child => child.Value.ExpectedWinner == thisPlayer).ToList();
             if (winningChildren.Count > 0)
             {
-                return winningChildren.Select(child => GetWord(child.Value.State)).ToList();                
+                return winningChildren.Select(child => child.Value.State.State ).ToList();                
             }
 
             var longestPossibleWord = FindLongestPossibleWord(treeNode);
             var longestWordChildren = treeNode.Children.Where(child => child.Value.LongestPossibleWord.Length == longestPossibleWord.Length).ToList();
             if (longestWordChildren.Count > 0)
             {
-                return longestWordChildren.Select(child => GetWord(child.Value.State)).ToList();
+                return longestWordChildren.Select(child => child.Value.State.State ).ToList();
             }
 
-            return treeNode.Children.Select(child => GetWord(child.Value.State)).ToList();
+            return treeNode.Children.Select(child => child.Value.State.State ).ToList();
         }
 
         private int FindExpectedMaxTurns(TreeNode<GhostGameStateAnalysis> treeNode)
@@ -255,10 +255,10 @@ namespace Game.Library.Impl
             treeNode.PostTraverse(AnalyseNode);
         }        
 
-        private string GetWord(IState state)
-        {
-            return (state as GhostGameState).Word;
-        }
+        //private string GetWord(IState state)
+        //{
+        //    return state.State;
+        //}
 
         private int GetCurrentPlayer(string word)
         {

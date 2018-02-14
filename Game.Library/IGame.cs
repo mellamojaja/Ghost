@@ -59,6 +59,11 @@ namespace Game.Library
         /// Call the next player, ask him for a move and updates everything accordingly to that move
         /// </summary>
         void PlayNextTurn();
+
+        /// <summary>
+        /// Creates a new state of the game from "stateData"
+        /// </summary>        
+        IState CreateState(object stateData);
     }
 
     /// <summary>

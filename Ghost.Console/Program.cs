@@ -25,12 +25,12 @@ namespace ConsoleGhost
                 ShowAnalysis();
                 CheckIfTereIsAWinnerAndAskToLeave();
 
-                Console.Write("$" + game.State.StateDescription + ": ");
+                Console.Write("$" + game.State.State + ": ");
                 game.PlayNextTurn();
                 if (game.State.CurrentPlayer == 0)
                 {
                     // Has just moved the computer. Give som feedback in the screen
-                    Console.Write(game.State.StateDescription[game.State.StateDescription.Length-1]);
+                    Console.Write(game.State.State[game.State.State.Length-1]);
                     Console.WriteLine("");
                 }                
             }            

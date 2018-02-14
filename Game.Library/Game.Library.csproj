@@ -45,7 +45,7 @@
     <Compile Include="IGameResult.cs" />
     <Compile Include="Impl\GhostAnalysisTree.cs" />
     <Compile Include="Impl\GhostGame.cs" />
-    <Compile Include="Impl\GhostGameState.cs" />
+    <Compile Include="Impl\GameState.cs" />
     <Compile Include="Impl\GhostGameStateAnalysis.cs" />
     <Compile Include="Impl\GhostBasePlayer.cs" />
     <Compile Include="Impl\GhostDumbIAPlayer.cs" />

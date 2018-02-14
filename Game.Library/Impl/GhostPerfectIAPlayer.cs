@@ -10,7 +10,7 @@
         public override IState NextMove(IGame game)
         {
             var analyse = Analyse(game) as GhostGameStateAnalysis;
-            var state = game.State as GhostGameState;
+            var state = game.State as GameState;
 
             if (analyse.Winner > -1)
             {
@@ -19,9 +19,9 @@
             }
 
             var recommendedWord = PickRandom(analyse.RecommendedWordList);
-            var result = recommendedWord.Substring(0, state.Word.Length + 1);
+            var result = recommendedWord.Substring(0, state.State.Length + 1);
 
-            return new GhostGameState(result);
+            return game.CreateState(result);
         }        
     }
 }

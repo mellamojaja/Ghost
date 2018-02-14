@@ -12,7 +12,7 @@ namespace Game.Library.Impl
         public override IState NextMove(IGame game)
         {
             var analyse = Analyse(game) as GhostGameStateAnalysis;
-            var state = game.State as GhostGameState;
+            var state = game.State;
 
             if (analyse.Winner > -1)
             {
@@ -20,13 +20,13 @@ namespace Game.Library.Impl
                 return null;
             }
 
-            var treeNode = GhostAnalysisTree.Instance.FindWordNodeOrLongestExistingRoot(state.Word);
-            var wordList = treeNode.Children.Select(child => (child.Value.State as GhostGameState).Word ).ToList();
+            var treeNode = GhostAnalysisTree.Instance.FindWordNodeOrLongestExistingRoot(state.State);
+            var wordList = treeNode.Children.Select(child => child.Value.State.State).ToList();
 
             var recommendedWord = PickRandom(wordList);
-            var result = recommendedWord.Substring(0, state.Word.Length + 1);
+            var result = recommendedWord.Substring(0, state.State.Length + 1);
 
-            return new GhostGameState(result);
+            return game.CreateState(result);
         }         
     }
 }

@@ -12,8 +12,8 @@ namespace Game.Library.Impl
         public override IState NextMove(IGame game)
         {
             var line = Console.ReadLine();
-            var newWord = (game.State as GhostGameState).Word + (line.ToLower().TrimStart())[0];
-            return new GhostGameState(newWord);            
+            var newWord = game.State.State + (line.ToLower().TrimStart())[0];
+            return game.CreateState(newWord);
         }          
     }
 }

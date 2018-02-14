@@ -8,16 +8,16 @@
         /// <summary>
         /// The index (starting with 0) of the current player, that is, the one that needs to play now
         /// </summary>
-        int CurrentPlayer { get; }
+        int CurrentPlayer { get; set; }
 
         /// <summary>
-        /// The representation of the current "state" or "turn" of the game
+        /// An encoded representation of the current "state" or "turn" of the game
         /// </summary>
-        object State { get; }
+        string State { get; set; }
 
         /// <summary>
-        /// The description of the current "state" or "turn" of the game
+        /// A description of the current "state" or "turn" of the game
         /// </summary>
-        string StateDescription { get; }
+        string Description { get; set; }
     }
 }

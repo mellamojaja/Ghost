@@ -15,7 +15,7 @@ namespace Game.Library.Impl
 
         public string Name { get { return _name; } }
 
-        public IState State { get { return _state; } set { _state = value as GhostGameState; } }
+        public IState State { get; set; }
         
 
         public IGameResult Result { get { return Analysis; } }        
@@ -24,32 +24,32 @@ namespace Game.Library.Impl
         {
             get
             {
-                var treeNode = _analysisTree.FindWordNodeOrLongestExistingRoot(_state.Word);
-                var wordType = _analysisTree.FindWordType(_state.Word);
+                var treeNode = _analysisTree.FindWordNodeOrLongestExistingRoot(State.State);
+                var wordType = _analysisTree.FindWordType(State.State);
                 var lastPlayer = State.CurrentPlayer == 0 ? 1 : 0;
                 var result = treeNode.Value.Copy();
-                result.State = _state;
+                result.State = State;
 
                 switch (wordType)
                 {
                     case WordType.invalid:
                         // Last player lost                
-                        result.Winner = _state.CurrentPlayer;
-                        result.Explanation = string.Format("Player {0} proposed the word '{1}' which does not exist", lastPlayer, _state.Word);
-                        result.ExpectedWinner = _state.CurrentPlayer;
+                        result.Winner = State.CurrentPlayer;
+                        result.Explanation = string.Format("Player {0} proposed the word '{1}' which does not exist", lastPlayer, State.State);
+                        result.ExpectedWinner = State.CurrentPlayer;
                         result.ExpectedMaxTurns = 0;
                         return result;
 
                     case WordType.derived:
                         // The proposed word would be reachable so something went wrong.
-                        result.Explanation = string.Format("Player {0} proposed the word '{1}' but it won't be reachable because there is shorter word", lastPlayer, _state.Word);
+                        result.Explanation = string.Format("Player {0} proposed the word '{1}' but it won't be reachable because there is shorter word", lastPlayer, State.State);
                         return result;
 
                     case WordType.completed:
                         // Last player lost
-                        result.Winner = _state.CurrentPlayer;
-                        result.Explanation = string.Format("Player {0} proposed the word '{1}' which exists", lastPlayer, _state.Word);
-                        result.ExpectedWinner = _state.CurrentPlayer;
+                        result.Winner = State.CurrentPlayer;
+                        result.Explanation = string.Format("Player {0} proposed the word '{1}' which exists", lastPlayer, State.State);
+                        result.ExpectedWinner = State.CurrentPlayer;
                         result.ExpectedMaxTurns = 0;
                         return result;
                 }
@@ -66,7 +66,7 @@ namespace Game.Library.Impl
                 {
                     // We don't know yet
                     result.Help = string.Format("The result is uncertain... the game may last {0} more turns, for example going for '{1}' or '{2}'",
-                            treeNode.Value.LongestPossibleWord.Length - _state.Word.Length,
+                            treeNode.Value.LongestPossibleWord.Length - State.State.Length,
                             treeNode.Value.ShortestPossibleWord,
                             treeNode.Value.LongestPossibleWord);
                     return result;
@@ -99,8 +99,8 @@ namespace Game.Library.Impl
 
         public void Reset()
         {
-            _state = new GhostGameState("");
-            _result = new GhostGameStateAnalysis(_state);
+            State = CreateState("");
+            _result = new GhostGameStateAnalysis(State);
         }
 
         public bool HasFinished { get { return Analysis.Winner > -1; } }
@@ -119,9 +119,15 @@ namespace Game.Library.Impl
             }            
         }        
 
+        public IState CreateState(object stateData)
+        {
+            var word = stateData as string;
+            var currentPlayer = word.Length % 2 == 0 ? 0 : 1;
+            return new GameState(currentPlayer, word, word);
+        }
+
         #region Private
-        private string _name;
-        private GhostGameState _state;
+        private string _name;        
         private IGameResult _result;
         private List<IPlayer> _playerList;
         private GhostAnalysisTree _analysisTree;       

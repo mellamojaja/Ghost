@@ -12,10 +12,7 @@ namespace Ghost.AI.API.SystemTests
         [TestInitialize]
         public void BeforeEachTest()
         {
-            State = new GameStateModel()
-            {
-                Word = "hello"
-            };
+            State = new GameStateModel("hello");
         }
 
         [TestMethod]

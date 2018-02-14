@@ -6,7 +6,7 @@ namespace Game.Library.Impl
     [DebuggerDisplay("P{State.CurrentPlayer} '{State.StateDescription}' W{Winner} EW{ExpectedWinner} From '{ShortestPossibleWord}' to '{LongestPossibleWord}'")]
     internal class GhostGameStateAnalysis : IStateAnalysis
     {                
-        public GhostGameStateAnalysis(GhostGameState state)
+        public GhostGameStateAnalysis(IState state)
         {
             State = state;
             Winner = -1;
@@ -36,7 +36,7 @@ namespace Game.Library.Impl
         {
             var newList = new List<string>(RecommendedWordList);
 
-            var result = new GhostGameStateAnalysis(State as GhostGameState)
+            var result = new GhostGameStateAnalysis(State)
             {
                 State = this.State,
                 Winner = Winner,

@@ -15,10 +15,7 @@ namespace Ghost.AI.API.Tests
         {
             Controller = new AnalyseController();
 
-            State = new GameStateModel()
-            {
-                Word = "hello"
-            };
+            State = new GameStateModel("hello");
         }
 
         [TestMethod]
