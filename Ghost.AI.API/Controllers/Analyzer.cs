@@ -39,6 +39,10 @@ namespace Ghost.AI.API.Controllers
             var state = _game.CreateState(stateModel.Word);
             _game.State = state;
             var newState = _player.NextMove(_game);
+            if (newState == null)
+            {
+                return stateModel;
+            }                
             var newStateModel = new GameStateModel(newState.State);
 
             return newStateModel;
