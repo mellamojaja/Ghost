@@ -161,12 +161,14 @@ namespace Game.Library.Impl
                 // The previous player completed the word, so you win
                 treeNode.Value.Winner = treeNode.Value.State.CurrentPlayer;
                 treeNode.Value.ExpectedMaxTurns = 0;
-                treeNode.Value.ExpectedWinner = treeNode.Value.State.CurrentPlayer;                
+                treeNode.Value.ExpectedWinner = treeNode.Value.State.CurrentPlayer;
+                treeNode.Value.LongestPossibleWord = GetWord(treeNode.Value.State);
+                treeNode.Value.ShortestPossibleWord = GetWord(treeNode.Value.State);
             }
             else
             {
                 treeNode.Value.ExpectedWinner = FindExpectedWinner(treeNode);
-                treeNode.Value.ExpectedMaxTurns = FindExpectedMaxTurns(treeNode);
+                treeNode.Value.ExpectedMaxTurns = FindExpectedMaxTurns(treeNode) + 1;
                 treeNode.Value.LongestPossibleWord = FindLongestPossibleWord(treeNode);
                 treeNode.Value.ShortestPossibleWord = FindShortestPossibleWord(treeNode);
                 treeNode.Value.RecommendedWordList = FindRecommendedWordList(treeNode);
@@ -203,6 +205,9 @@ namespace Game.Library.Impl
                     result = child.Value.LongestPossibleWord;
                 }                
             }
+            if (result == "")
+                return "";
+
             return result;
         }
 

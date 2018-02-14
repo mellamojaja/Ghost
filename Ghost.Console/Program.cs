@@ -1,57 +1,37 @@
 ﻿using System;
 using Game.Library;
-using Game.Library.Impl;
 
 namespace ConsoleGhost
 {
     class Program
     {
         public static IGame game;
-        public static IPlayer player1;        
+        public static IPlayer computerPlayer;
+        public static IPlayer humanPlayer;
 
         static void Main(string[] args)
         {
-            game = GameFactory.Instance.CreateGame(GameType.ghost);
-            player1 = game.CreatePlayer("Terminator", PlayerType.perfectIa);            
-            var line = "";
+            game = GameFactory.Instance.CreateGame(GameType.ghost, "Optimal Ghost");
+            humanPlayer = game.CreatePlayer("Donald Trump", PlayerType.human);
+            computerPlayer = game.CreatePlayer("C3PO", PlayerType.perfectIa);
+            game.AddPlayer(humanPlayer);
+            game.AddPlayer(computerPlayer);
 
             Console.WriteLine(string.Format("Welcome to the '{0}' game.", game.Name));
             RestartGame();
             
             while (true)
             {
-                ShowAnalysis();                
-                if (game.GetResult().Winner > -1)
-                {                    
-                    if (AskForExit())
-                    {
-                        return;
-                    }
-                    else
-                    {
-                        RestartGame();
-                        continue;
-                    }
-                }
+                ShowAnalysis();
+                CheckIfTereIsAWinnerAndAskToLeave();
 
                 Console.Write("$" + game.State.StateDescription + ": ");
+                game.PlayNextTurn();
                 if (game.State.CurrentPlayer == 0)
                 {
-                    // Human plays
-                    line = Console.ReadLine();
-                    if (line == "exit")
-                    {
-                        return;
-                    }
-                    game.State = new GhostGameState(game.State.StateDescription + (line.TrimStart())[0]);                    
-                }
-                else
-                {
-                    // Computer plays              
-                    var newState = player1.NextMove(game) as GhostGameState;
-                    Console.Write(newState.Word[newState.Word.Length-1]);
+                    // Has just moved the computer. Give som feedback in the screen
+                    Console.Write(game.State.StateDescription[game.State.StateDescription.Length-1]);
                     Console.WriteLine("");
-                    game.State = newState;
                 }                
             }            
         }
@@ -73,13 +53,28 @@ namespace ConsoleGhost
             return false;
         }
 
+        public static void CheckIfTereIsAWinnerAndAskToLeave()
+        {
+            if (game.Result.Winner > -1)
+            {
+                if (AskForExit())
+                {
+                    Environment.Exit(0);
+                }
+                else
+                {
+                    RestartGame();                    
+                }
+            }
+        }
+
         public static void ShowAnalysis()
         {
-            var analysis = game.GetAnalysis();
+            var analysis = game.Analysis;
 
             if (analysis.Winner > -1)
             {
-                Console.WriteLine(string.Format("Player {0} wins, because {1}", analysis.Explanation));
+                Console.WriteLine(string.Format("Player {0} wins, because {1}", analysis.Winner, analysis.Explanation));
             }
             else 
             {

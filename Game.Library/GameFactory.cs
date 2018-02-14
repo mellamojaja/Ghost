@@ -34,10 +34,10 @@ namespace Game.Library
         /// </summary>
         /// <param name="gameType"></param>
         /// <returns></returns>
-        public IGame CreateGame(GameType gameType) {
+        public IGame CreateGame(GameType gameType, string name) {
             switch (gameType) {
                 case GameType.ghost:
-                    return new GhostGame();
+                    return new GhostGame(name);
 
                 default:
                     return null;

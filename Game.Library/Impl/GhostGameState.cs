@@ -3,7 +3,7 @@
 namespace Game.Library.Impl
 {
     [DebuggerDisplay("P{CurrentPlayer} '{StateDescription}'")]
-    public class GhostGameState : IState
+    internal class GhostGameState : IState
     {        
         public GhostGameState(string word) 
         {

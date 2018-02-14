@@ -24,14 +24,14 @@ namespace Ghost.AI.API.Tests
         [TestMethod]
         public void Get_MustNotReturnNull()
         {            
-            var analysis = Controller.Get(State);
+            var analysis = Controller.Post(State);
             Assert.IsNotNull(analysis);
         }
 
         [TestMethod]
         public void Get_WinnerPropertyMustBeFilled()
         {            
-            var analysis = Controller.Get(State);
+            var analysis = Controller.Post(State);
             Assert.AreEqual(-1, analysis.Winner);
         }
     }

@@ -20,12 +20,12 @@ namespace Game.Library
         /// <summary>
         /// Returns the evaluation of the current state of the game
         /// </summary>
-        IGameResult GetResult();
+        IGameResult Result { get; }
 
         /// <summary>
         /// Returns the analysis of the current state of the game
         /// </summary>
-        IStateAnalysis GetAnalysis();
+        IStateAnalysis Analysis { get; }
 
         /// <summary>
         /// Returns a new player for this game
@@ -51,9 +51,14 @@ namespace Game.Library
         void Reset();
 
         /// <summary>
-        /// Starts the game, calling the players in order, getting their moves and updating the game state
+        /// Returns true if the game has finished (there is a winner or is a draw)
         /// </summary>
-        void Start();
+        bool HasFinished { get; }
+
+        /// <summary>
+        /// Call the next player, ask him for a move and updates everything accordingly to that move
+        /// </summary>
+        void PlayNextTurn();
     }
 
     /// <summary>

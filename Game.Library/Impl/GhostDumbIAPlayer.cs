@@ -1,12 +1,14 @@
-﻿namespace Game.Library.Impl
+﻿using System.Linq;
+
+namespace Game.Library.Impl
 {
-    internal class GhostPerfectIAPlayer : GhostBasePlayer, IPlayer
+    internal class GhostDumbIAPlayer : GhostBasePlayer, IPlayer
     {
-        public GhostPerfectIAPlayer(string name) : base(name)
+        public GhostDumbIAPlayer(string name) : base(name)
         {            
-            _type = PlayerType.perfectIa;           
+            _type = PlayerType.ia;
         }
-        
+       
         public override IState NextMove(IGame game)
         {
             var analyse = Analyse(game) as GhostGameStateAnalysis;
@@ -18,10 +20,13 @@
                 return null;
             }
 
-            var recommendedWord = PickRandom(analyse.RecommendedWordList);
+            var treeNode = GhostAnalysisTree.Instance.FindWordNodeOrLongestExistingRoot(state.Word);
+            var wordList = treeNode.Children.Select(child => (child.Value.State as GhostGameState).Word ).ToList();
+
+            var recommendedWord = PickRandom(wordList);
             var result = recommendedWord.Substring(0, state.Word.Length + 1);
 
             return new GhostGameState(result);
-        }        
+        }         
     }
 }

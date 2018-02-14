@@ -3,11 +3,11 @@ using System.Collections.Generic;
 
 namespace Game.Library.Impl
 {
-    public class GhostGame : IGame
+    internal class GhostGame : IGame
     {       
-        public GhostGame()
+        public GhostGame(string name)
         {
-            _name = "Optimal Ghost";
+            _name = name;
             _playerList = new List<IPlayer>();
             _analysisTree = GhostAnalysisTree.Instance;
             Reset();
@@ -18,69 +18,60 @@ namespace Game.Library.Impl
         public IState State { get { return _state; } set { _state = value as GhostGameState; } }
         
 
-        public IGameResult GetResult()
+        public IGameResult Result { get { return Analysis; } }        
+
+        public IStateAnalysis Analysis            
         {
-            return GetAnalysis();
-        }
-
-        public IStateAnalysis GetAnalysis()
-        {
-            var treeNode = _analysisTree.FindWordNodeOrLongestExistingRoot(_state.Word);
-            var wordType = _analysisTree.FindWordType(_state.Word);
-            var lastPlayer = State.CurrentPlayer == 0 ? 1 : 0;            
-
-            if (wordType == WordType.invalid)
+            get
             {
-                // Last player lost
-                return new GhostGameStateAnalysis(_state)
+                var treeNode = _analysisTree.FindWordNodeOrLongestExistingRoot(_state.Word);
+                var wordType = _analysisTree.FindWordType(_state.Word);
+                var lastPlayer = State.CurrentPlayer == 0 ? 1 : 0;
+                var result = treeNode.Value.Copy();
+                result.State = _state;
+
+                switch (wordType)
                 {
-                    Winner = _state.CurrentPlayer,
-                    Explanation = string.Format("Player {0} proposed the word '{1}' which does not exist", lastPlayer, _state.Word),
-                    ExpectedWinner = _state.CurrentPlayer,
-                    ExpectedMaxTurns = 0
-                };
-            }
+                    case WordType.invalid:
+                        // Last player lost                
+                        result.Winner = _state.CurrentPlayer;
+                        result.Explanation = string.Format("Player {0} proposed the word '{1}' which does not exist", lastPlayer, _state.Word);
+                        result.ExpectedWinner = _state.CurrentPlayer;
+                        result.ExpectedMaxTurns = 0;
+                        return result;
 
-            if (wordType == WordType.derived)
-            {
-                // The proposed word would be reachable so something went wrong.
-                return new GhostGameStateAnalysis(_state)
-                {                    
-                    Explanation = string.Format("Player {0} proposed the word '{1}' but it won't be reachable because there is shorter word", lastPlayer, _state.Word)                 
-                };
-            }
+                    case WordType.derived:
+                        // The proposed word would be reachable so something went wrong.
+                        result.Explanation = string.Format("Player {0} proposed the word '{1}' but it won't be reachable because there is shorter word", lastPlayer, _state.Word);
+                        return result;
 
-            if (wordType == WordType.completed)
-            {
-                // Last player lost
-                return new GhostGameStateAnalysis(_state)
+                    case WordType.completed:
+                        // Last player lost
+                        result.Winner = _state.CurrentPlayer;
+                        result.Explanation = string.Format("Player {0} proposed the word '{1}' which exists", lastPlayer, _state.Word);
+                        result.ExpectedWinner = _state.CurrentPlayer;
+                        result.ExpectedMaxTurns = 0;
+                        return result;
+                }
+
+                if (treeNode.Value.ExpectedWinner > -1)
                 {
-                    Winner = _state.CurrentPlayer,
-                    Explanation = string.Format("Player {0} proposed the word '{1}' which exists", lastPlayer, _state.Word),
-                    ExpectedWinner = _state.CurrentPlayer,
-                    ExpectedMaxTurns = 0
-                };
-            }
-
-            if (treeNode.Value.ExpectedWinner > -1)
-            {
-                // A player is about to win
-                return new GhostGameStateAnalysis(_state)
-                {                    
-                    ExpectedWinner = treeNode.Value.ExpectedWinner,                    
-                    ExpectedMaxTurns = treeNode.Value.ExpectedMaxTurns,
-                    Help = string.Format("Player {0} should win going for the word '{1}'", treeNode.Value.ExpectedWinner, treeNode.Value.RecommendedWordList[0])
-                };
-            }
-
-            // We don't know yet
-            return new GhostGameStateAnalysis(_state)
-            {
-                Help = string.Format("The result is uncertain... the game could last {0} more turns, for example going for '{1}' or '{2}'",
-                    treeNode.Value.LongestPossibleWord.Length - _state.Word.Length,
-                    treeNode.Value.ShortestPossibleWord,
-                    treeNode.Value.LongestPossibleWord)
-            };
+                    // A player is about to win                
+                    var wordList = "";
+                    treeNode.Value.RecommendedWordList.ForEach(word => wordList = wordList + (wordList == "" ? "" : ", ") + word);
+                    result.Help = string.Format("Player {0} may win going for: {1}", treeNode.Value.ExpectedWinner, wordList);
+                    return result;
+                }
+                else
+                {
+                    // We don't know yet
+                    result.Help = string.Format("The result is uncertain... the game may last {0} more turns, for example going for '{1}' or '{2}'",
+                            treeNode.Value.LongestPossibleWord.Length - _state.Word.Length,
+                            treeNode.Value.ShortestPossibleWord,
+                            treeNode.Value.LongestPossibleWord);
+                    return result;
+                }
+            }         
         }
 
         public List<IPlayer> PlayerList { get { return _playerList; } }
@@ -95,10 +86,10 @@ namespace Game.Library.Impl
             switch (playerType)
             {
                 case PlayerType.human:
-                    throw new NotImplementedException();                    
+                    return new GhostHumanPlayer(name);
 
                 case PlayerType.ia:
-                    throw new NotImplementedException();                    
+                    return new GhostDumbIAPlayer(name);
 
                 case PlayerType.perfectIa:
                 default:
@@ -112,16 +103,20 @@ namespace Game.Library.Impl
             _result = new GhostGameStateAnalysis(_state);
         }
 
-        public void Start()
+        public bool HasFinished { get { return Analysis.Winner > -1; } }
+
+        public void PlayNextTurn()
         {
             if (PlayerList.Count != 2)
             {
                 throw new Exception(string.Format("To play {0} game, there must be 2 players", Name));
             }
-            
-            // todo: Add here the logic to call the players in order and get their moves
 
-            return; 
+            if (! HasFinished)
+            {
+                var nextState = PlayerList[State.CurrentPlayer].NextMove(this);
+                State = nextState;
+            }            
         }        
 
         #region Private
@@ -129,7 +124,7 @@ namespace Game.Library.Impl
         private GhostGameState _state;
         private IGameResult _result;
         private List<IPlayer> _playerList;
-        private GhostAnalysisTree _analysisTree;
+        private GhostAnalysisTree _analysisTree;       
         #endregion
     }
 }
