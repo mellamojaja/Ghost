@@ -34,12 +34,12 @@
         </div>
 
         <div class="form-group">
-            @Html.EditorFor(model => model.NewMove, new { htmlAttributes = new { @class = "form-control letter-input", @id = "newMove" } })
+            @Html.EditorFor(model => model.NewMove, new { htmlAttributes = new { @class = "form-control letter-input" } })
         </div>
 
         <div class="form-group">
             <button type="submit" name="command" value="Add" class="btn btn-primary">Add</button>
-            <button type="submit" name="command" value="Pass" class="btn btn-danger disabled">Pass</button>
+            <button type="submit" name="command" value="Pass" class="btn btn-danger disabled" tabindex="-1">Pass</button>
         </div>
     </div>
 
@@ -65,15 +65,12 @@
                             </div>
                         </div>
                     </div>
-                    @if (Model.ShowPlayerHelp == true)
-                    {
-                        <div class="form-group">
-                            <div>
-                                <div id="humanPlayerHelp" class="alert alert-info">
-                                </div>
+                    <div class="form-group">
+                        <div>
+                            <div id="humanPlayerHelp" class="alert alert-info">
                             </div>
                         </div>
-                    }
+                    </div>                    
                 </div>
 
                 <div class="col-md-offset-1 col-md-4">

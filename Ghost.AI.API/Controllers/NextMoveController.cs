@@ -11,6 +11,9 @@ namespace Ghost.AI.API.Controllers
         // POST: api/nextmove/{state}
         public GameStateModel Post(GameStateModel state)
         {
+            if (state == null)
+                return null;
+
             var newState = Analyzer.Instance.NextMove(state);
 
             return newState;

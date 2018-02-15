@@ -21,8 +21,8 @@ namespace Ghost.MVC.Controllers
         public ActionResult Play(GamePlayModel game)
         {
             if (Request.Params["command"] != null && Request.Params["command"].Equals("Pass"))
-            {
-                return RedirectToAction("Pass", Game);
+            {                
+                return RedirectToAction("Pass", Game);             
             }
 
             RememberInputFieldValues(game);

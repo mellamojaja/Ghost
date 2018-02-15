@@ -11,6 +11,9 @@ namespace Ghost.AI.API.Controllers
         // POST: api/analyse/{state}
         public GameAnalysisModel Post(GameStateModel state)
         {
+            if (state == null)
+                return null;
+
             var analysis = Analyzer.Instance.Analyze(state);
 
             return analysis;
