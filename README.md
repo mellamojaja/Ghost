@@ -12,10 +12,10 @@ This project contains several sub-project related to the [game Ghost](https://en
 
 ## TODO list
 There are many thing pending, but these are on the top of the list now: 
-1. Add asynchronous request to the client side of the MVC application.
+1. ~~Add asynchronous request to the client side of the MVC application~~
 2. Add GUI tests
 3. Deploy the API and the web application to the cloud
-4. Mask the input box in the web application
+4. ~~Mask the input box in the web application~~
 5. Implement the "pass" functionality: if is the user's turn and he thinks the previous letter inserted by his opponent was incorrect because the word doesn't not exist, then he could click the "pass" button. This way, the other player would have to complete the word, or will loose the game
 6. Record the score of the players of the web application in a database. This way I would be able to implement some form of persistence.
 
